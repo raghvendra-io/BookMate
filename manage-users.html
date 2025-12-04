@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Manage Users — LMS</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Page-specific */
+    body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:#f8fafc; margin:0; }
+    .page { display:flex; min-height:100vh; gap:20px; }
+    .sidebar { min-width:220px; background:#0b556f; color:white; padding: 18px; }
+    .main { flex: 1;}
+    h2 { margin:0 0 6px 0; }
+    .small { font-size:13px; color:#94a3b8; }
+    .toolbar { display:flex; gap:12px; align-items:center; margin:14px 0 12px; flex-wrap:wrap; }
+    .btn { padding:8px 12px; border-radius:8px; border:0; cursor:pointer; }
+    .btn.primary { background:#0b556f; color:white; }
+    .btn.ghost { background:transparent; border:1px solid #e6eef6; }
+    .search { padding:8px 10px; border-radius:8px; border:1px solid #e6eef6; width:280px; }
+    table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 8px 20px rgba(2,6,23,.06); }
+    thead { background:#0f172a; color:white; }
+    th, td { padding:10px 12px; border-bottom:1px solid #eef2f7; text-align:left; font-size:14px; vertical-align:middle; }
+    tbody tr:hover { background:#fbfdff; }
+    .avatar-sm { width:40px;height:40px;border-radius:8px;object-fit:cover }
+    .pager { display:flex; gap:6px; align-items:center; }
+    .page-btn { padding:6px 8px; border-radius:6px; border:1px solid #e6eef6; background:white; cursor:pointer; }
+    .muted { color:#94a3b8; }
+    .checkbox { width:18px; height:18px; }
+    .role-badge { padding:4px 8px; border-radius:8px; font-size:13px; color:white; }
+    .role-admin { background:#ef4444; }
+    .role-member { background:#0ea5a4; }
+    @media (max-width:900px){ .search{width:160px} }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" aria-label="Sidebar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">📚</div>
+        <h1 class="brand-name">BookMate</h1>
+      </div>
+
+      <div class="profile" role="region" aria-label="Profile">
+        <img src="https://images.unsplash.com/photo-1588534331122-77ac46322dd2?w=600&auto=format&fit=crop&q=60" alt="admin" class="avatar">
+        <div class="profile-text">
+          <div class="small">Welcome!</div>
+          <strong id="profileName">admin</strong>
+        </div>
+      </div>
+
+      <nav class="side-nav" role="navigation" aria-label="Main navigation">
+        <a class="nav-item active" href="Dashboard.html"><i class="fa fa-home" aria-hidden="true"></i><span>Dashboard</span></a>
+        <a class="nav-item" href="profile.html"><i class="fa fa-user" aria-hidden="true"></i><span>Profile</span></a>
+        <a class="nav-item" href="manage-books.html"><i class="fa fa-book" aria-hidden="true"></i><span>Manage Book</span></a>
+        <a class="nav-item" href="manage-users.html"><i class="fa fa-users" aria-hidden="true"></i><span>Manage Users</span></a>
+        <a class="nav-item" href="#"><i class="fa fa-book-open" aria-hidden="true"></i><span>Issued Books</span></a>
+      </nav>
+
+
+      <button id="logoutBtn" class="btn" aria-label="Logout" style="background:transparent;color:white;border:0;padding:20px;margin-top: 24px;width:100%;">Logout</button>
+
+      <div class="sidebar-footer">© All rights reserved</div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+      <header class="topbar">
+        <h2>Librarian Control Panel</h2>
+        <div class="top-actions" role="group" aria-label="Top actions">
+          <div class="notif" title="Notifications"><i class="fa fa-bell" aria-hidden="true"></i><span id="notifBadge" class="badge">0</span></div>
+          <div class="user"><img id="topAvatar" src="https://images.unsplash.com/photo-1588534331122-77ac46322dd2?w=600&auto=format&fit=crop&q=60" alt="user" class="avatar-sm"></div>
+        </div>
+      </header>
+
+   
+      <header style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h2>Manage Users</h2>
+          <div class="small muted">Create, edit and manage library members & admins</div>
+        </div>
+
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="exportBtn" class="btn ghost" title="Export CSV"><i class="fa fa-file-export"></i> Export CSV</button>
+          <button id="addBtn" class="btn primary"><i class="fa fa-user-plus"></i> Add User</button>
+        </div>
+      </header>
+
+      <div class="toolbar" role="toolbar">
+        <input id="search" class="search" placeholder="Search by name or email..." />
+        <label style="display:flex;gap:8px;align-items:center"><input id="selectAll" class="checkbox" type="checkbox"> Select all</label>
+        <button id="bulkDelete" class="btn">Delete selected</button>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <div class="muted">Rows per page</div>
+          <select id="rowsPerPage"><option>10</option><option>25</option><option>50</option></select>
+        </div>
+      </div>
+
+      <table aria-label="Users table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>User</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Joined</th>
+            <th style="width:180px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+        <div class="muted" id="tableInfo">0 users</div>
+        <div class="pager" id="pager"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal: Add / Edit User -->
+  <div id="modal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.45);">
+    <div style="width:640px;max-width:96%;background:white;padding:18px;border-radius:10px;box-shadow:0 20px 50px rgba(2,6,23,.3)">
+      <h3 id="modalTitle">Add User</h3>
+      <form id="userForm">
+        <input type="hidden" id="userId">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <label>Full name<input id="u-name" class="search" required></label>
+          <label>Email<input id="u-email" type="email" class="search" required></label>
+          <label>Password<input id="u-password" type="password" class="search" placeholder="min 8 chars" ></label>
+          <label>Role
+            <select id="u-role" class="search">
+              <option value="member">Member</option>
+              <option value="admin">Admin</option>
+            </select>
+          </label>
+        </div>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+          <button type="button" id="modalCancel" class="btn ghost">Cancel</button>
+          <button type="submit" class="btn primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      // --- Storage helpers (lms_demo_users) ---
+      function loadUsers(){
+        try { return JSON.parse(localStorage.getItem('lms_demo_users') || '[]'); }
+        catch(e){ return []; }
+      }
+      function saveUsers(arr){ localStorage.setItem('lms_demo_users', JSON.stringify(arr)); }
+
+      // --- Auth guard ---
+      const storedLocal = localStorage.getItem('lms_demo_current_user');
+      const storedSession = sessionStorage.getItem('lms_demo_current_user');
+      const currentUser = storedLocal ? JSON.parse(storedLocal) : (storedSession ? JSON.parse(storedSession) : null);
+      if (!currentUser) { window.location.href = 'login.html'; return; }
+
+      // DOM refs
+      const tbody = document.getElementById('tbody');
+      const tableInfo = document.getElementById('tableInfo');
+      const searchInput = document.getElementById('search');
+      const rowsPerPageSelect = document.getElementById('rowsPerPage');
+      const pager = document.getElementById('pager');
+      const selectAll = document.getElementById('selectAll');
+      const bulkDeleteBtn = document.getElementById('bulkDelete');
+      const exportBtn = document.getElementById('exportBtn');
+      const addBtn = document.getElementById('addBtn');
+      const modal = document.getElementById('modal');
+      const modalTitle = document.getElementById('modalTitle');
+      const userForm = document.getElementById('userForm');
+      const modalCancel = document.getElementById('modalCancel');
+
+      let users = loadUsers();
+      let filter = '';
+      let currentPage = 1;
+      let rowsPerPage = Number(rowsPerPageSelect.value || 10);
+
+      // --- Render ---
+      function render(){
+        rowsPerPage = Number(rowsPerPageSelect.value || 10);
+        const filtered = users.filter(u => {
+          if (!filter) return true;
+          const q = filter.toLowerCase();
+          return (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q);
+        });
+        const total = filtered.length;
+        const pages = Math.max(1, Math.ceil(total / rowsPerPage));
+        if (currentPage > pages) currentPage = pages;
+        const start = (currentPage -1) * rowsPerPage;
+        const pageItems = filtered.slice(start, start + rowsPerPage);
+
+        tbody.innerHTML = '';
+        pageItems.forEach(u => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><input class="row-checkbox" data-email="${u.email}" type="checkbox" /></td>
+            <td style="display:flex;gap:10px;align-items:center">
+              <img src="${u.avatar || 'https://via.placeholder.com/80x80?text=Avatar'}" alt="" class="avatar-sm">
+              <div>
+                <div style="font-weight:600">${escapeHtml(u.name || u.email)}</div>
+                <div class="muted" style="font-size:13px">${escapeHtml(u.email)}</div>
+              </div>
+            </td>
+            <td>${escapeHtml(u.email)}</td>
+            <td>${renderRole(u.role)}</td>
+            <td>${u.joined || '—'}</td>
+            <td>
+              <button class="btn ghost btn-edit" data-email="${u.email}"><i class="fa fa-edit"></i> Edit</button>
+              <button class="btn" style="background:#ef4444;color:white;border-radius:6px" data-email="${u.email}" data-action="delete"><i class="fa fa-trash"></i></button>
+              <button class="btn" style="background:#0ea5a4;color:white;border-radius:6px" data-email="${u.email}" data-action="reset"><i class="fa fa-key"></i></button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        tableInfo.textContent = `${total} users (${users.length} total)`;
+        renderPager(pages, currentPage);
+        selectAll.checked = false;
+      }
+
+      function renderRole(r){
+        if (r === 'admin') return `<span class="role-badge role-admin">Admin</span>`;
+        return `<span class="role-badge role-member">Member</span>`;
+      }
+
+      function renderPager(pages, current){
+        pager.innerHTML = '';
+        if (pages <= 1) return;
+        const prev = document.createElement('button'); prev.className='page-btn'; prev.textContent='‹ Prev'; prev.disabled = current===1;
+        prev.addEventListener('click', ()=>{ currentPage = Math.max(1, currentPage-1); render(); });
+        pager.appendChild(prev);
+        const label = document.createElement('div'); label.className='muted'; label.textContent = `Page ${current} of ${pages}`; pager.appendChild(label);
+        const next = document.createElement('button'); next.className='page-btn'; next.textContent='Next ›'; next.disabled = current===pages;
+        next.addEventListener('click', ()=>{ currentPage = Math.min(pages, currentPage+1); render(); });
+        pager.appendChild(next);
+      }
+
+      // --- Helpers ---
+      function escapeHtml(s){ return (s+'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+      function generateJoined(){ return new Date().toLocaleDateString(); }
+
+      // --- Events ---
+      rowsPerPageSelect.addEventListener('change', ()=> { currentPage = 1; render(); });
+      searchInput.addEventListener('input', (e)=> { filter = e.target.value.trim(); currentPage = 1; render(); });
+
+      selectAll.addEventListener('change', (e)=> {
+        document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = e.target.checked);
+      });
+
+      bulkDeleteBtn.addEventListener('click', ()=> {
+        const checked = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.dataset.email);
+        if (!checked.length) return alert('No users selected.');
+        if (!confirm(`Delete ${checked.length} selected users?`)) return;
+        users = users.filter(u => !checked.includes(u.email));
+        saveUsers(users); render();
+      });
+
+      // table actions delegation (edit, delete, reset)
+      tbody.addEventListener('click', (e)=>{
+        const editBtn = e.target.closest('.btn-edit');
+        const actionBtn = e.target.closest('button[data-action]');
+        if (editBtn) {
+          const email = editBtn.dataset.email;
+          openModalEdit(email);
+        } else if (actionBtn) {
+          const email = actionBtn.dataset.email;
+          const act = actionBtn.dataset.action;
+          if (act === 'delete') { deleteUser(email); }
+          else if (act === 'reset') { resetPassword(email); }
+        }
+      });
+
+      // export CSV
+      exportBtn.addEventListener('click', ()=>{
+        if (!users.length) return alert('No users to export.');
+        const rows = users.map(u => ({ name:u.name, email:u.email, role:u.role, joined:u.joined || '' }));
+        const csv = toCsv(rows);
+        download('users_export.csv', csv);
+      });
+
+      // add user
+      addBtn.addEventListener('click', ()=> openModalAdd());
+
+      // modal operations
+      function openModalAdd(){
+        modalTitle.textContent = 'Add User';
+        userForm.reset();
+        document.getElementById('userId').value = '';
+        modal.style.display = 'flex';
+      }
+      function openModalEdit(email){
+        const u = users.find(x => x.email === email);
+        if (!u) return alert('User not found.');
+        modalTitle.textContent = 'Edit User';
+        document.getElementById('userId').value = u.email;
+        document.getElementById('u-name').value = u.name || '';
+        document.getElementById('u-email').value = u.email || '';
+        document.getElementById('u-password').value = ''; // blank => keep existing
+        document.getElementById('u-role').value = u.role || 'member';
+        modal.style.display = 'flex';
+      }
+      modalCancel.addEventListener('click', ()=> modal.style.display = 'none');
+
+      userForm.addEventListener('submit', (e)=> {
+        e.preventDefault();
+        const id = document.getElementById('userId').value; // existing user's email if editing
+        const name = document.getElementById('u-name').value.trim();
+        const email = document.getElementById('u-email').value.trim().toLowerCase();
+        const password = document.getElementById('u-password').value;
+        const role = document.getElementById('u-role').value;
+
+        if (!name || !email) return alert('Name and email are required.');
+        if (!id && password.length < 8) return alert('Password must be at least 8 characters for new users.');
+
+        const idx = users.findIndex(u => u.email === email);
+        if (id) {
+          // editing: ensure email hasn't changed to a duplicate
+          if (email !== id && idx !== -1) return alert('Another user with that email exists.');
+          // update
+          users = users.map(u => {
+            if (u.email !== id) return u;
+            const updated = {...u, name, email, role};
+            if (password) updated.password = password; // change pw if provided
+            return updated;
+          });
+        } else {
+          // adding new user
+          if (idx !== -1) return alert('User with that email already exists.');
+          users.unshift({ name, email, password, role, joined: generateJoined(), avatar: '' });
+        }
+        saveUsers(users);
+        modal.style.display = 'none';
+        render();
+      });
+
+      // delete single user
+      function deleteUser(email){
+        if (!confirm('Delete this user? This action cannot be undone.')) return;
+        users = users.filter(u => u.email !== email);
+        saveUsers(users);
+        render();
+      }
+
+      // reset password (admin only)
+      function resetPassword(email){
+        if (currentUser.role !== 'admin') return alert('Only admin can reset passwords (demo).');
+        const newPw = prompt('Enter new password (min 8 chars):');
+        if (!newPw || newPw.length < 8) return alert('Password must be at least 8 characters.');
+        users = users.map(u => u.email === email ? {...u, password: newPw} : u);
+        saveUsers(users);
+        alert('Password reset for ' + email);
+      }
+
+      // CSV helpers
+      function toCsv(rows){
+        const keys = Object.keys(rows[0]);
+        const esc = v => `"${(v??'').toString().replace(/"/g,'""')}"`;
+        const lines = [keys.join(',')];
+        rows.forEach(r => lines.push(keys.map(k => esc(r[k] ?? '')).join(',')));
+        return lines.join('\n');
+      }
+      function download(filename, text){
+        const blob = new Blob([text], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      }
+
+      // logout
+      document.getElementById('logoutBtn').addEventListener('click', ()=> {
+        localStorage.removeItem('lms_demo_current_user');
+        sessionStorage.removeItem('lms_demo_current_user');
+        window.location.href = 'login.html';
+      });
+
+      // init
+      render();
+
+    })();
+  </script>
+</body>
+</html>
