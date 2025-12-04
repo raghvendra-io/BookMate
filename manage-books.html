@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LMS Dashboard - Starter</title>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Page-specific styling */
+    .page { display:flex; gap:24px; min-height:100vh; }
+    .sidebar { min-width:220px; background:#0b556f; color:white; }
+    .main { flex:1; background:#f8fafc; padding-left: 1; }
+    .toolbar { display:flex; align-items:center; margin-bottom:14px; flex-wrap:wrap;padding: 5px; }
+    .btn { padding:8px 12px; border-radius:8px; border:0; cursor:pointer; }
+    .btn.primary { background:#0b556f; color:white; }
+    .btn.ghost { background:transparent; border:1px solid #e6eef6; }
+    .table { width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden; box-shadow:0 8px 20px rgba(2,6,23,.06); }
+    .table thead { background:#0f172a; color:white; }
+    .table th, .table td { padding:10px 12px; border-bottom:1px solid #eef2f7; text-align:left; font-size:14px; }
+    .table tbody tr:hover { background:#fbfdff; }
+    .small { font-size:13px; color:#64748b; }
+    .controls { display:flex; gap:8px; align-items:center; }
+    .search { padding:8px 10px; border-radius:8px; border:1px solid #e6eef6; width:280px; }
+    .pager { display:flex; gap:6px; align-items:center; }
+    .page-btn { padding:6px 8px; border-radius:6px; border:1px solid #e6eef6; background:white; cursor:pointer; }
+    .checkbox { width:18px; height:18px; }
+    .muted { color:#94a3b8; }
+    .flex-row { display:flex; gap:8px; align-items:center; margin-bottom:15px; }
+    @media (max-width:900px){ .search{width:160px} }
+  </style>
+</head>
+
+<body>
+  <div class="app page">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" aria-label="Sidebar">
+      <div class="brand">
+        <div class="logo">📚</div>
+        <h1 class="brand-name">BookMate</h1>
+      </div>
+
+      <div class="profile">
+        <img src="https://images.unsplash.com/photo-1588534331122-77ac46322dd2?w=600" class="avatar">
+        <div class="profile-text">
+          <div class="small">Welcome!</div>
+          <strong id="profileName">admin</strong>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <a class="nav-item active" href="Dashboard.html"><i class="fa fa-home"></i><span>Dashboard</span></a>
+        <a class="nav-item" href="profile.html"><i class="fa fa-user"></i><span>Profile</span></a>
+        <a class="nav-item" href="manage-books.html"><i class="fa fa-book"></i><span>Manage Book</span></a>
+        <a class="nav-item" href="manage-users.html"><i class="fa fa-users"></i><span>Manage Users</span></a>
+        <a class="nav-item"><i class="fa fa-book-open"></i><span>Issued Books</span></a>
+      </nav>
+
+      <button id="logoutBtn" class="btn" style="background:transparent;color:white;width:100%">Logout</button>
+      <div class="sidebar-footer">© All Rights Reserved</div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+
+      <header class="topbar">
+        <h2>Librarian Control Panel</h2>
+        <div class="top-actions">
+          <div class="notif"><i class="fa fa-bell"></i><span id="notifBadge" class="badge">0</span></div>
+          <div class="user"><img id="topAvatar" src="https://images.unsplash.com/photo-1588534331122-77ac46322dd2?w=600" class="avatar-sm"></div>
+        </div>
+      </header>
+
+      <!-- Buttons Row -->
+      <div class="flex-row">
+        <button id="btnExport" class="btn ghost"><i class="fa fa-file-export"></i> Export CSV</button>
+        <label class="btn ghost">
+          <i class="fa fa-file-import"></i> Import CSV
+          <input id="importFile" type="file" accept=".csv" style="display:none">
+        </label>
+        <button id="btnAdd" class="btn primary"><i class="fa fa-plus"></i> Add Book</button>
+      </div>
+
+      <!-- Controls -->
+      <div class="toolbar">
+        <input id="search" class="search" placeholder="Search by title, author, ISBN..." />
+        <div class="controls">
+          <label><input id="selectAll" type="checkbox" class="checkbox"> Select all</label>
+          <button id="btnBulkDelete" class="btn">Delete selected</button>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+          <div class="muted">Rows per page</div>
+          <select id="rowsPerPage">
+            <option>10</option>
+            <option>25</option>
+            <option>50</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <table class="table" id="booksTable">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Year</th>
+            <th>ISBN</th>
+            <th>Copies</th>
+            <th>Available</th>
+            <th style="width:140px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="booksTbody"></tbody>
+      </table>
+
+      <div style="display:flex;justify-content:space-between;margin-top:12px">
+        <div class="small muted" id="tableInfo">0 books</div>
+        <div class="pager" id="pager"></div>
+      </div>
+
+    </div> <!-- END MAIN -->
+
+  </div> <!-- END app -->
+
+  <!-- Modal -->
+  <div id="modal" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.45);">
+    <div style="width:680px;background:white;padding:18px;border-radius:10px;">
+      <h3 id="modalTitle">Add Book</h3>
+      <form id="bookForm">
+        <input type="hidden" id="bookId">
+        <div style="display:grid;grid-template-columns:1fr 140px;gap:12px">
+          <div>
+            <label>Title<input id="title" required class="search" /></label>
+            <label>Author<input id="author" class="search" /></label>
+            <label>ISBN<input id="isbn" class="search" /></label>
+            <label>Year<input id="year" type="number" class="search" /></label>
+          </div>
+          <div>
+            <label>Copies<input id="copies" type="number" min="0" value="1" class="search" /></label>
+            <label>Cover URL<input id="cover" class="search" /></label>
+            <label>Description<textarea id="desc" rows="6" class="search"></textarea></label>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+          <button type="button" id="modalCancel" class="btn ghost">Cancel</button>
+          <button type="submit" class="btn primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="script.js" defer></script>
+
+</body>
+</html>
