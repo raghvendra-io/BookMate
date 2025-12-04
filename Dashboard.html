@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LMS Dashboard - Starter</title>
+
+  <!-- Font for icons (or replace with your SVGs) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" aria-label="Sidebar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">📚</div>
+        <h1 class="brand-name">BookMate</h1>
+      </div>
+
+      <div class="profile" role="region" aria-label="Profile">
+        <img src="https://images.unsplash.com/photo-1588534331122-77ac46322dd2?w=600&auto=format&fit=crop&q=60" alt="admin" class="avatar">
+        <div class="profile-text">
+          <div class="small">Welcome!</div>
+          <strong id="profileName">admin</strong>
+        </div>
+      </div>
+
+      <nav class="side-nav" role="navigation" aria-label="Main navigation">
+        <a class="nav-item active" href="Dashboard.html"><i class="fa fa-home" aria-hidden="true"></i><span>Dashboard</span></a>
+        <a class="nav-item" href="profile.html"><i class="fa fa-user" aria-hidden="true"></i><span>Profile</span></a>
+        <a class="nav-item" href="manage-books.html"><i class="fa fa-book" aria-hidden="true"></i><span>Manage Book</span></a>
+        <a class="nav-item" href="manage-users.html"><i class="fa fa-users" aria-hidden="true"></i><span>Manage Users</span></a>
+        <a class="nav-item" href="#"><i class="fa fa-book-open" aria-hidden="true"></i><span>Issued Books</span></a>
+      </nav>
+
+
+      <button id="logoutBtn" class="btn" aria-label="Logout" style="background:transparent;color:white;border:0;padding:20px;margin-top: 24px;width:100%;">Logout</button>
+
+      <div class="sidebar-footer">© All rights reserved</div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+      <header class="topbar">
+        <h2>Librarian Control Panel</h2>
+        <div class="top-actions" role="group" aria-label="Top actions">
+          <div class="notif" title="Notifications"><i class="fa fa-bell" aria-hidden="true"></i><span id="notifBadge" class="badge">0</span></div>
+          <div class="user"><img id="topAvatar" src="https://images.unsplash.com/photo-1588534331122-77ac46322dd2?w=600&auto=format&fit=crop&q=60" alt="user" class="avatar-sm"></div>
+        </div>
+      </header>
+
+      <main class="content">
+        <div class="breadcrumb" aria-hidden="true">Home / Dashboard</div>
+
+        <!-- Cards grid -->
+        <section class="cards-grid" aria-live="polite">
+          <article class="card blue" aria-label="Members">
+            <div class="card-number" id="membersCount">0</div>
+            <div class="card-label">Members</div>
+            <i class="fa fa-users card-icon" aria-hidden="true"></i>
+          </article>
+
+          <article class="card green" aria-label="Issued Books">
+            <div class="card-number" id="issuedCount">0</div>
+            <div class="card-label">Issued Books</div>
+            <i class="fa fa-rocket card-icon" aria-hidden="true"></i>
+          </article>
+
+          <article class="card red" aria-label="Books">
+            <div class="card-number" id="booksCount">0</div>
+            <div class="card-label">Books</div>
+            <i class="fa fa-book card-icon" aria-hidden="true"></i>
+          </article>
+
+          <article class="card orange" aria-label="Fine">
+            <div class="card-number" id="fineAmount">0</div>
+            <div class="card-label">Fine</div>
+            <i class="fa fa-dollar-sign card-icon" aria-hidden="true"></i>
+          </article>
+
+          <!-- action tiles -->
+          <article class="card red big"><div class="card-label">Manage Book</div><i class="fa fa-book-open card-icon" aria-hidden="true"></i></article>
+          <article class="card yellow big"><div class="card-label">Manage User</div><i class="fa fa-user card-icon" aria-hidden="true"></i></article>
+          <article class="card cyan big"><div class="card-label">Status</div><i class="fa fa-sync card-icon" aria-hidden="true"></i></article>
+          <article class="card green big"><div class="card-label">Requested Books</div><i class="fa fa-file-alt card-icon" aria-hidden="true"></i></article>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Dashboard behavior -->
+  <script>
+    (function () {
+      // On load: check for demo user in localStorage/sessionStorage (keys used by the demo login page)
+      const storedLocal = localStorage.getItem('lms_demo_current_user');
+      const storedSession = sessionStorage.getItem('lms_demo_current_user');
+      const currentUser = storedLocal ? JSON.parse(storedLocal) : (storedSession ? JSON.parse(storedSession) : null);
+
+      if (!currentUser) {
+        // Not logged in — redirect to login page
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Show user name in UI
+      document.getElementById('profileName').textContent = currentUser.name || currentUser.email || 'User';
+
+      // Populate counts from demo storage keys
+      function safeParse(key) {
+        try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; }
+      }
+
+      // Members count (demo users)
+      const members = safeParse('lms_demo_users') || [];
+      document.getElementById('membersCount').textContent = members.length;
+
+      // Books and transactions (if using the starter Store previously created)
+      const store = safeParse('star_library_v1') || { books: [], transactions: [] };
+      const books = store.books || [];
+      const transactions = store.transactions || [];
+
+      document.getElementById('booksCount').textContent = books.length;
+      document.getElementById('issuedCount').textContent = transactions.filter(t => !t.returnedAt).length;
+
+      // Fine amount (demo): calculate sum of any 'fine' field inside transactions (if present),
+      // otherwise show placeholder 0
+      const fineSum = transactions.reduce((s, t) => s + (t.fine || 0), 0);
+      document.getElementById('fineAmount').textContent = fineSum;
+
+      // Notification badge (demo)
+      document.getElementById('notifBadge').textContent = 0;
+
+      // Logout behavior: clear demo session and redirect to login
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('lms_demo_current_user');
+        sessionStorage.removeItem('lms_demo_current_user');
+        // Optionally keep registered users, but clear session
+        window.location.href = 'login.html';
+      });
+    })();
+  </script>
+
+  <script src="script.js" defer></script>
+  <script src="script.js"></script>
+</body>
+</html>
