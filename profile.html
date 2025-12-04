@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LMS Dashboard - Starter</title>
+
+  <!-- Font for icons (or replace with your SVGs) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+     /* Page-specific overrides / small helpers */
+    .profile-wrap { display: flex; gap: 28px; align-items: flex-start; padding: 28px; }
+    .card { background:white; border-radius:10px; box-shadow:0 8px 20px rgba(2,6,23,0.06); padding:20px; }
+    .profile-panel { width:320px; text-align:center; }
+    .avatar-xl { width:140px; height:140px; border-radius:14px; object-fit:cover; display:block; margin:0 auto 12px; }
+    .field { margin-bottom:12px; }
+    label { display:block; font-weight:600; margin-bottom:6px; color:#334155; }
+    input[type="text"], input[type="email"], input[type="password"], textarea {
+      width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6eef6; font-size:14px;
+    }
+    .muted { color:#64748b; font-size:13px; }
+    .btn-row { display:flex; gap:10px; margin-top:12px; }
+    .btn.primary { background:#0b556f; color:white; border:0; padding:10px 14px; border-radius:8px; cursor:pointer; }
+    .btn.ghost { background:transparent; border:1px solid #e6eef6; padding:10px 12px; border-radius:8px; cursor:pointer; }
+    .section-title { font-size:16px; margin-bottom:10px; color:#0f172a; }
+    .small { font-size:13px; color:#64748b; }
+    @media (max-width:880px){ .profile-wrap { flex-direction:column } .profile-panel{ width:100% } }
+  
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" aria-label="Sidebar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">📚</div>
+        <h1 class="brand-name">BookMate</h1>
+      </div>
+
+      <div class="profile" role="region" aria-label="Profile">
+        <img src="https://images.unsplash.com/photo-1588534331122-77ac46322dd2?w=600&auto=format&fit=crop&q=60" alt="admin" class="avatar">
+        <div class="profile-text">
+          <div class="small">Welcome!</div>
+          <strong id="profileName">admin</strong>
+        </div>
+      </div>
+
+      <nav class="side-nav" role="navigation" aria-label="Main navigation">
+        <a class="nav-item active" href="Dashboard.html"><i class="fa fa-home" aria-hidden="true"></i><span>Dashboard</span></a>
+        <a class="nav-item" href="profile.html"><i class="fa fa-user" aria-hidden="true"></i><span>Profile</span></a>
+        <a class="nav-item" href="manage-books.html"><i class="fa fa-book" aria-hidden="true"></i><span>Manage Book</span></a>
+        <a class="nav-item" href="manage-users.html"><i class="fa fa-users" aria-hidden="true"></i><span>Manage Users</span></a>
+        <a class="nav-item" href="#"><i class="fa fa-book-open" aria-hidden="true"></i><span>Issued Books</span></a>
+      </nav>
+      
+
+      <button id="logoutBtn" class="btn" aria-label="Logout" style="background:transparent;color:white;border:0;padding:20px;margin-top: 24px;width:100%;">Logout</button>
+
+      <div class="sidebar-footer">© All rights reserved</div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+      <header class="topbar">
+        <h2>Librarian Control Panel</h2>
+        <div class="top-actions" role="group" aria-label="Top actions">
+          <div class="notif" title="Notifications"><i class="fa fa-bell" aria-hidden="true"></i><span id="notifBadge" class="badge">0</span></div>
+          <div class="user"><img id="topAvatar" src="https://images.unsplash.com/photo-1588534331122-77ac46322dd2?w=600&auto=format&fit=crop&q=60" alt="user" class="avatar-sm"></div>
+        </div>
+         
+      </header>
+      <main class="content">
+        
+        <h2 style="margin:0">Profile</h2>
+          <div class="small">Manage your account details</div>
+           
+         <div style="flex:1">
+          <div class="card">
+            <div class="section-title">Edit Profile</div>
+
+            <form id="profileForm" autocomplete="off">
+              <div class="field">
+                <label for="name">Full name</label>
+                <input id="name" type="text" required>
+              </div>
+
+              <div class="field">
+                <label for="email">Email (cannot change)</label>
+                <input id="email" type="email" disabled>
+              </div>
+              <div class="field">
+                <label for="avatarFile">Avatar (jpg / png) — optional</label>
+                <input id="avatarFile" type="file" accept="image/*">
+                <div class="small muted">Choose an image and press Save — stored locally for demo.</div>
+              </div>
+
+              <div class="btn-row" style="margin-top:6px">
+                <button type="submit" class="btn primary">Save changes</button>
+                <button type="button" id="cancelEdit" class="btn ghost">Cancel</button>
+              </div>
+            </form>
+          </div>
+
+          <div style="height:16px"></div>
+
+          <div class="card" style="margin-top:8px">
+            <div class="section-title">Change password</div>
+
+             <form id="pwForm" autocomplete="off">
+              <div class="field">
+                <label for="currentPw">Current password</label>
+                <input id="currentPw" type="password" required>
+              </div>
+
+              <div class="field">
+                <label for="newPw">New password (min 8 chars)</label>
+                <input id="newPw" type="password" required>
+              </div>
+
+              <div class="btn-row">
+                <button type="submit" class="btn primary">Change password</button>
+                <button type="button" id="clearPw" class="btn ghost">Clear</button>
+              </div>
+
+              <div id="pwMsg" class="small" style="margin-top:10px"></div>
+            </form>
+        </div>
+         </div>
+        </section>
+
+
+        
+
+
+          
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Dashboard behavior -->
+  
+  <script src="script.js" defer></script>
+  <script src="script.js"></script>
+  <script>
+    (function () {
+      // Helper: get current demo user from storage
+      function getCurrentUser() {
+        const localU = localStorage.getItem('lms_demo_current_user');
+        const sessU = sessionStorage.getItem('lms_demo_current_user');
+        return localU ? JSON.parse(localU) : (sessU ? JSON.parse(sessU) : null);
+      }
+      function setCurrentUser(user, remember) {
+        if (remember) {
+          localStorage.setItem('lms_demo_current_user', JSON.stringify(user));
+          sessionStorage.removeItem('lms_demo_current_user');
+        } else {
+          sessionStorage.setItem('lms_demo_current_user', JSON.stringify(user));
+          localStorage.removeItem('lms_demo_current_user');
+        }
+      }
+      function getUsersArray() {
+        try { return JSON.parse(localStorage.getItem('lms_demo_users') || '[]'); } catch (e) { return []; }
+      }
+      function saveUsersArray(arr) { localStorage.setItem('lms_demo_users', JSON.stringify(arr)); }
+
+      // Redirect to login if no user
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        window.location.href = 'login.html';
+        return;
+      }
+      // DOM refs
+      const avatarPreview = document.getElementById('avatarPreview');
+      const displayName = document.getElementById('displayName');
+      const displayEmail = document.getElementById('displayEmail');
+      const nameInput = document.getElementById('name');
+      const emailInput = document.getElementById('email');
+      const avatarFile = document.getElementById('avatarFile');
+      const profileForm = document.getElementById('profileForm');
+      const pwForm = document.getElementById('pwForm');
+      const currentPw = document.getElementById('currentPw');
+      const newPw = document.getElementById('newPw');
+      const pwMsg = document.getElementById('pwMsg');
+      const editBtn = document.getElementById('editBtn');
+      const cancelEdit = document.getElementById('cancelEdit');
+
+       // Populate UI with current user
+      function populate(user) {
+        displayName.textContent = user.name || user.email;
+        displayEmail.textContent = user.email;
+        nameInput.value = user.name || '';
+        emailInput.value = user.email || '';
+        avatarPreview.src = user.avatar || 'https://via.placeholder.com/300x300?text=Avatar';
+      }
+      populate(currentUser);
+
+      // Edit button scrolls to form
+      editBtn.addEventListener('click', () => {
+        window.scrollTo({ top: document.body.scrollTop + 200, behavior: 'smooth' });
+        nameInput.focus();
+      });
+      // Cancel restores original values
+      cancelEdit.addEventListener('click', () => populate(getCurrentUser()));
+
+      // Avatar preview change
+      let avatarDataUrl = null;
+      avatarFile.addEventListener('change', (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (!f) return;
+        if (!f.type.startsWith('image/')) return alert('Please choose an image file.');
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          avatarDataUrl = ev.target.result;
+          avatarPreview.src = avatarDataUrl;
+        };
+        reader.readAsDataURL(f);
+      });
+       // Save profile changes
+      profileForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = nameInput.value.trim();
+        if (!name) return alert('Name cannot be empty.');
+
+        const users = getUsersArray();
+        const idx = users.findIndex(u => u.email === currentUser.email);
+        if (idx === -1) {
+          // user not found (shouldn't happen) — add and set current
+          const newUser = { name, email: currentUser.email, password: currentUser.password || '', avatar: avatarDataUrl || currentUser.avatar || '' };
+          users.push(newUser);
+          saveUsersArray(users);
+          setCurrentUser(newUser, !!localStorage.getItem('lms_demo_current_user'));
+          populate(newUser);
+          alert('Profile saved.');
+          return;
+        }
+         // Update existing user object
+        users[idx].name = name;
+        if (avatarDataUrl) users[idx].avatar = avatarDataUrl;
+        saveUsersArray(users);
+
+        // update current user object in storage too
+        const remember = !!localStorage.getItem('lms_demo_current_user'); // preserve remember state
+        const updatedUser = users[idx];
+        setCurrentUser(updatedUser, remember);
+
+        populate(updatedUser);
+        alert('Profile updated successfully (demo).');
+      });
+      // Change password handler (demo)
+      pwForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const cur = currentPw.value || '';
+        const nw = newPw.value || '';
+
+        if (nw.length < 8) { pwMsg.textContent = 'New password must be at least 8 characters.'; pwMsg.style.color = '#b91c1c'; return; }
+
+        const users = getUsersArray();
+        const idx = users.findIndex(u => u.email === currentUser.email);
+        if (idx === -1) { pwMsg.textContent = 'User not found.'; pwMsg.style.color = '#b91c1c'; return; }
+
+        if (users[idx].password !== cur) { pwMsg.textContent = 'Current password is incorrect.'; pwMsg.style.color = '#b91c1c'; return; }
+
+        users[idx].password = nw;
+        saveUsersArray(users);
+
+        // update current user storage
+        const remember = !!localStorage.getItem('lms_demo_current_user');
+        const updatedUser = users[idx];
+        setCurrentUser(updatedUser, remember);
+
+        currentPw.value = ''; newPw.value = '';
+        pwMsg.textContent = 'Password changed successfully.';
+        pwMsg.style.color = '#059669';
+      });
+
+      // Back to dashboard
+      document.getElementById('backBtn').addEventListener('click', () => { window.location.href = 'index.html'; });
+
+      // Logout
+      document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('lms_demo_current_user');
+        sessionStorage.removeItem('lms_demo_current_user');
+        window.location.href = 'login.html';
+      });
+    })();
+
+
+
+
+  </script>
+</body>
+</html>
