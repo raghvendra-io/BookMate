@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login — LMS</title>
+
+  <!-- reuse existing app styles (optional) -->
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="style.css">
+
+  <!-- small page-specific styles -->
+  <style>
+    body {display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#213040;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+    .auth-card{width:920px;height:450px;max-width:96%;display:grid;grid-template-columns:1fr 420px;background:white;border-radius:10px;overflow:hidden;box-shadow:0 10px 30px rgba(2,6,23,0.08)}
+    .left{
+      background:linear-gradient(180deg,#0b556f,#0f4b62);
+      color:white;padding:36px;display:flex;flex-direction:column;gap:16px;align-items:center;justify-content:center;
+    }
+    .left h1{margin:0;font-size:26px}
+    .left p{opacity:0.9;margin:0}
+    .right{padding:26px}
+    .tabs{display:flex;gap:6px;margin-bottom:12px}
+    .tab{flex:1;padding:10px 12px;border-radius:8px;text-align:center;cursor:pointer;background:#f1f5f9}
+    .tab.active{background:#0b556f;color:white}
+    form{display:flex;flex-direction:column;gap:10px}
+
+    .input{width:100%;padding:10px;border-radius:8px;border:1px solid #e6eef6}
+    .helper{font-size:13px;color:#64748b}
+    .actions{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+    .btn{padding:10px 14px;border-radius:8px;border:0;cursor:pointer}
+    .btn.primary{background:#0b556f;color:white}
+    .msg{padding:10px;border-radius:8px;font-size:14px}
+    .msg.error{background:#ffecec;color:#932b2b}
+    .msg.ok{background:#e6fff0;color:#006638}
+    .small-link{font-size:13px;color:#0b556f;cursor:pointer}
+    .pw-strength{font-size:13px;color:#475569}
+    .footer-note{font-size:13px;color:#94a3b8;margin-top:8px}
+    @media (max-width:880px){ .auth-card{grid-template-columns:1fr} .left{padding:22px} }
+  </style>
+</head>
+
+<body>
+  <div class="auth-card" role="main" aria-labelledby="auth-title">
+    <div class="left">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:56px;height:56px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:22px">📚</div>
+        <div>
+          <h1 id="auth-title">LMS Admin</h1>
+          <p>Access your librarian control panel — secure and simple</p>
+        </div>
+      </div>
+
+      <div style="width:100%;max-width:360px;text-align:center;margin-top:12px">
+        <p class="helper">If you don't have an account, switch to Register tab and create one.</p>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="tabs" role="tablist" aria-label="Authentication tabs">
+        <div class="tab active" data-tab="login" role="tab" aria-selected="true">Login</div>
+        <div class="tab" data-tab="register" role="tab" aria-selected="false">Register</div>
+        <div class="tab" data-tab="forgot" role="tab" aria-selected="false">Forgot</div>
+      </div>
+
+      <div id="message" aria-live="polite"></div>
+
+      <!-- LOGIN -->
+      <form id="form-login" autocomplete="on" style="display:block" novalidate>
+        <label> Email
+          <input id="login-email" class="input" type="email" required placeholder="you@example.com" />
+        </label>
+
+        <label> Password
+          <div style="display:flex;gap:8px">
+            <input id="login-password" class="input" type="password" required placeholder="••••••••" />
+            <button type="button" id="toggle-login-pw" class="btn" title="show/hide">Show</button>
+          </div>
+        </label>
+
+        <div style="display:flex;gap:12px;align-items:center;justify-content:space-between">
+          <label style="display:flex;gap:8px;align-items:center"><input id="remember" type="checkbox"/> Remember me</label>
+          <a class="small-link" data-goto="forgot">Forgot password?</a>
+        </div>
+
+        <div class="actions">
+          <div class="footer-note">Don't have an account? <span class="small-link" data-goto="register">Register</span></div>
+          <button id="btnLogin" class="btn primary" type="submit">Login</button>
+        </div>
+      </form>
+
+      <!-- REGISTER -->
+      <form id="form-register" style="display:none" novalidate>
+        <label> Full name <input id="reg-name" class="input" type="text" placeholder="Your name" required /></label>
+        <label> Email <input id="reg-email" class="input" type="email" placeholder="you@example.com" required /></label>
+
+        <label> Password
+          <div style="display:flex;gap:8px">
+            <input id="reg-password" class="input" type="password" placeholder="At least 8 characters" required />
+            <button type="button" id="toggle-reg-pw" class="btn" title="show/hide">Show</button>
+          </div>
+        </label>
+        <div id="pw-strength" class="pw-strength">Password strength: —</div>
+
+        <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:6px">
+          <div class="helper">By registering you accept local demo storage.</div>
+          <button id="btnRegister" class="btn primary" type="submit">Create account</button>
+        </div>
+      </form>
+
+      <!-- FORGOT -->
+      <form id="form-forgot" style="display:none" novalidate>
+        <label> Email <input id="forgot-email" class="input" type="email" placeholder="you@example.com" required /></label>
+        <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+          <div class="helper">We will show a reset code (demo). In production this would email you a link.</div>
+          <button id="btnSendCode" class="btn" type="button">Send code</button>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <input id="reset-code" class="input" placeholder="Reset code" />
+          <input id="reset-password" class="input" placeholder="New password" type="password" />
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:10px">
+          <button id="btnReset" class="btn primary" type="button">Reset password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Optional external auth helper (if you have one). It is safe to include; we check before calling it. -->
+  <script src="script.js" defer></script>
+
+  <!-- Page behavior: tab switching, toggles and safe auth usage -->
+  <script>
+    (function () {
+      // Tab switching
+      const tabs = document.querySelectorAll('.tab');
+      const forms = {
+        login: document.getElementById('form-login'),
+        register: document.getElementById('form-register'),
+        forgot: document.getElementById('form-forgot')
+      };
+      function showTab(name) {
+        tabs.forEach(t => {
+          const is = t.dataset.tab === name;
+          t.classList.toggle('active', is);
+          t.setAttribute('aria-selected', is ? 'true' : 'false');
+        });
+        Object.keys(forms).forEach(k => forms[k].style.display = (k === name) ? 'block' : 'none');
+        // clear message
+        document.getElementById('message').textContent = '';
+      }
+      tabs.forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
+      // data-goto links
+      document.querySelectorAll('[data-goto]').forEach(a => {
+        a.addEventListener('click', (e) => { e.preventDefault(); showTab(a.dataset.goto); });
+      });
+
+      // Password show/hide toggles
+      function setupToggle(buttonId, inputId) {
+        const btn = document.getElementById(buttonId);
+        const input = document.getElementById(inputId);
+        if (!btn || !input) return;
+        btn.addEventListener('click', () => {
+          const isPw = input.type === 'password';
+          input.type = isPw ? 'text' : 'password';
+          btn.textContent = isPw ? 'Hide' : 'Show';
+        });
+      }
+      setupToggle('toggle-login-pw', 'login-password');
+      setupToggle('toggle-reg-pw', 'reg-password');
+
+      // Simple password strength indicator for register form
+      const regPw = document.getElementById('reg-password');
+      const strengthEl = document.getElementById('pw-strength');
+      if (regPw && strengthEl) {
+        regPw.addEventListener('input', () => {
+          const v = regPw.value || '';
+          let score = 0;
+          if (v.length >= 8) score++;
+          if (/[A-Z]/.test(v)) score++;
+          if (/[0-9]/.test(v)) score++;
+          if (/[^A-Za-z0-9]/.test(v)) score++;
+          const labels = ['Very weak','Weak','Okay','Good','Strong'];
+          strengthEl.textContent = 'Password strength: ' + labels[score];
+        });
+      }
+
+      // Safe usage of auth object if available
+      function safeRequireAuth(redirectTo) {
+        try {
+          if (window.auth && typeof auth.requireAuth === 'function') {
+            // auth.requireAuth should return true if auth is present OR handle redirect.
+            return auth.requireAuth(redirectTo);
+          }
+        } catch (err) {
+          console.warn('auth.requireAuth failed:', err);
+        }
+        // If auth not present, don't block the page (this is the login page)
+        return true;
+      }
+
+      // If you want to force users away from this page when already logged in,
+      // call auth.redirectIfAuthenticated('app.html') inside your auth.js implementation.
+      // We keep this page free so login/register can be used.
+
+      // Form handlers (demo behavior using localStorage)
+      const messageEl = document.getElementById('message');
+      function showMessage(text, type='error') {
+        messageEl.innerHTML = `<div class="msg ${type==='ok' ? 'ok' : 'error'}">${text}</div>`;
+      }
+
+      // Demo register: store user in localStorage (WARNING: demo only)
+      document.getElementById('form-register').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim().toLowerCase();
+        const pw = document.getElementById('reg-password').value;
+        if (!name || !email || pw.length < 8) { showMessage('Please fill valid registration details. (Password >= 8 chars)', 'error'); return; }
+        const users = JSON.parse(localStorage.getItem('lms_demo_users') || '[]');
+        if (users.find(u=>u.email===email)) { showMessage('Account already exists for that email.', 'error'); return; }
+        users.push({ name, email, password: pw });
+        localStorage.setItem('lms_demo_users', JSON.stringify(users));
+        showMessage('Account created. You can now login.', 'ok');
+        showTab('login');
+      });
+
+      // Demo login: validate against stored users
+      document.getElementById('form-login').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value.trim().toLowerCase();
+        const pw = document.getElementById('login-password').value;
+        const users = JSON.parse(localStorage.getItem('lms_demo_users') || '[]');
+        const user = users.find(u=>u.email===email && u.password===pw);
+        if (!user) { showMessage('Invalid email or password.', 'error'); return; }
+
+        // remember checkbox (demo)
+        if (document.getElementById('remember').checked) {
+          localStorage.setItem('lms_demo_current_user', JSON.stringify(user));
+        } else {
+          sessionStorage.setItem('lms_demo_current_user', JSON.stringify(user));
+        }
+
+        showMessage('Login successful. Redirecting…', 'ok');
+
+        // If auth helper exists, prefer using it to complete login flow
+        if (window.auth && typeof auth.onLogin === 'function') {
+          try { auth.onLogin(user); } catch (err) { console.warn(err); }
+        }
+
+        // Demo redirect (replace with your app page)
+        setTimeout(()=> { window.location.href = 'Dashboard.html'; }, 700);
+      });
+
+      // Demo: send code and reset (no email send in demo)
+      document.getElementById('btnSendCode').addEventListener('click', () => {
+        const email = document.getElementById('forgot-email').value.trim().toLowerCase();
+        if (!email) { showMessage('Enter your email to receive the code.', 'error'); return; }
+        const code = Math.floor(100000 + Math.random()*900000).toString();
+        sessionStorage.setItem('lms_demo_reset_code', code);
+        sessionStorage.setItem('lms_demo_reset_email', email);
+        showMessage('Reset code (demo): ' + code, 'ok');
+      });
+
+      document.getElementById('btnReset').addEventListener('click', () => {
+        const code = document.getElementById('reset-code').value.trim();
+        const pw = document.getElementById('reset-password').value;
+        const stored = sessionStorage.getItem('lms_demo_reset_code');
+        const email = sessionStorage.getItem('lms_demo_reset_email');
+        if (!stored || !email) { showMessage('Please request a reset code first.', 'error'); return; }
+        if (code !== stored) { showMessage('Invalid reset code.', 'error'); return; }
+        if (pw.length < 8) { showMessage('Password must be at least 8 characters.', 'error'); return; }
+        const users = JSON.parse(localStorage.getItem('lms_demo_users') || '[]');
+        const idx = users.findIndex(u=>u.email===email);
+        if (idx === -1) { showMessage('No account found for that email.', 'error'); return; }
+        users[idx].password = pw;
+        localStorage.setItem('lms_demo_users', JSON.stringify(users));
+        sessionStorage.removeItem('lms_demo_reset_code');
+        sessionStorage.removeItem('lms_demo_reset_email');
+        showMessage('Password reset. You can now login.', 'ok');
+        showTab('login');
+      });
+
+      // Initialize
+      showTab('login');
+
+      // Optional: if you want to require auth for other pages, call safeRequireAuth('login.html') from those pages.
+    })();
+  </script>
+
+  <!-- Optional application script (keeps backward compatibility with your setup) -->
+  <script src="script.js"></script>
+</body>
+</html>
